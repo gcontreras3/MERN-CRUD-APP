@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 import "./user.css";
+import { Link } from "react-router-dom";
 
 const User = () => {
   // users is the current state and setUsers is the updated state.
@@ -16,12 +18,23 @@ const User = () => {
     };
     fetchData();
   }, []); // adding empty array to ensure it only runs once
+  const deleteUser = async (userId) => {
+    await axios
+      .delete(`http://localhost:8000/api/delete/user/${userId}`)
+      .then((response) => {
+        setUsers((prevUser) => prevUser.filter((user) => user._id !== userId));
+        toast.success(response.data.message, { position: "top-right" });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <div className="userTable">
-      <button type="button" className="btn btn-primary">
+      <Link to="/add" type="button" className="btn btn-primary">
         Add User <i className="fa-solid fa-user-plus"></i>
-      </button>
+      </Link>
       <table className="table table-bordered">
         <thead>
           <tr>
@@ -36,15 +49,23 @@ const User = () => {
           {users.map((user, index) => {
             return (
               <tr>
-                <td>{index+1}</td>
+                <td>{index + 1}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>{user.address}</td>
                 <td className="actionButtons">
-                  <button type="button" class="btn btn-info">
+                  <Link
+                    to={`/update/` + user._id}
+                    type="button"
+                    class="btn btn-info"
+                  >
                     <i class="fa-solid fa-pen-to-square"></i>
-                  </button>
-                  <button type="button" class="btn btn-outline-danger">
+                  </Link>
+                  <button
+                    onClick={() => deleteUser(user._id)}
+                    type="button"
+                    class="btn btn-outline-danger"
+                  >
                     <i class="fa-solid fa-trash"></i>
                   </button>
                 </td>
